@@ -23,6 +23,7 @@ export const LandingForm = () => {
 
   const onConnectClick = () => {
     localStorage.setItem('serverInfo', JSON.stringify({ server, token }));
+    window.location.reload();
   };
 
   return (

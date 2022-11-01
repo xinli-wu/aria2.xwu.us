@@ -11,6 +11,8 @@ const wsCtx = {
   ws: new Client(`wss://${JSON.parse(localStorage.getItem('serverInfo'))?.server}`),
   isConnected: false,
   token: `token:${JSON.parse(localStorage.getItem('serverInfo'))?.token}`,
+  hasToken: JSON.parse(localStorage.getItem('serverInfo'))?.token ? true : false,
+  hasRpcServer: JSON.parse(localStorage.getItem('serverInfo'))?.server ? true : false
 };
 export const WSContext = React.createContext(wsCtx);
 
@@ -27,7 +29,7 @@ function App() {
   const appCtxValue = useMemo(() => ({ drawerOpen, setDrawerOpen }), [drawerOpen]);
 
   const [mode, setMode] = React.useState('dark');
-  const { ws, token } = wsCtx;
+  const { ws, hasToken, hasRpcServer } = wsCtx;
 
   const colorMode = React.useMemo(
     () => ({
@@ -44,7 +46,7 @@ function App() {
 
   useEffect(() => {
     (async () => {
-      if (token) {
+      if (hasToken) {
         ws.on('open', () => {
           setIsConnected(true);
           // call an RPC method with parameters
@@ -78,8 +80,10 @@ function App() {
         });
       }
     })();
-    return () => ws.close();
-  }, [ws, token]);
+    return () => {
+      if (hasRpcServer) ws.close();
+    };
+  }, [ws, hasToken, hasRpcServer]);
 
   return (
     <ColorModeContext.Provider value={colorMode}>

@@ -69,7 +69,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 export const Main = ({ colorMode }) => {
   const theme = useTheme();
-  const { token } = useContext(WSContext);
+  const { hasToken } = useContext(WSContext);
 
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -128,7 +128,7 @@ export const Main = ({ colorMode }) => {
       </Drawer>
       <MainWrapper open={menuOpen}>
         <DrawerHeader />
-        {!token
+        {!hasToken
           ? <LandingForm />
           : <Routes>
             <Route path='/' element={<Home />} />
