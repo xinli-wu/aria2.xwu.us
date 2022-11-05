@@ -20,7 +20,6 @@ export const TaskPeers = () => {
           { "methodName": "aria2.tellStatus", "params": [token, taskId] },
           { "methodName": "aria2.getPeers", "params": [token, taskId] }]
         ]).then((result) => {
-          console.log(result[1][0]);
           setPeers([...result[1][0], result[0][0]].map(x => ({ ...x, id: x.ip || 'local' })));
         });
       }

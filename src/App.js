@@ -8,12 +8,15 @@ import { Main } from './Main';
 const ColorModeContext = React.createContext({ toggleColorMode: () => { } });
 
 const wsCtx = {
-  ws: new Client(`wss://${JSON.parse(localStorage.getItem('serverInfo'))?.server}`),
+  ws: null,
+  rpc: JSON.parse(localStorage.getItem('serverInfo'))?.rpc,
+  setRpc: (_v) => { },
+  token: JSON.parse(localStorage.getItem('serverInfo'))?.token ? `token:${JSON.parse(localStorage.getItem('serverInfo'))?.token}` : undefined,
+  setToken: (_v) => { },
   isConnected: false,
-  token: `token:${JSON.parse(localStorage.getItem('serverInfo'))?.token}`,
-  hasToken: JSON.parse(localStorage.getItem('serverInfo'))?.token ? true : false,
-  hasRpcServer: JSON.parse(localStorage.getItem('serverInfo'))?.server ? true : false
+  setIsConnected: (_v) => { },
 };
+
 export const WSContext = React.createContext(wsCtx);
 
 const appCtx = {
@@ -23,13 +26,15 @@ const appCtx = {
 export const AppContext = React.createContext(appCtx);
 
 function App() {
+  const [rpc, setRpc] = useState(wsCtx.rpc);
+  const [ws, setWs] = useState(wsCtx.ws);
+  const [token, setToken] = useState(wsCtx.token);
   const [isConnected, setIsConnected] = useState(wsCtx.isConnected);
 
   const [drawerOpen, setDrawerOpen] = useState(appCtx.drawerOpen);
   const appCtxValue = useMemo(() => ({ drawerOpen, setDrawerOpen }), [drawerOpen]);
 
   const [mode, setMode] = React.useState('dark');
-  const { ws, hasToken, hasRpcServer } = wsCtx;
 
   const colorMode = React.useMemo(
     () => ({
@@ -45,58 +50,52 @@ function App() {
   );
 
   useEffect(() => {
-    (async () => {
-      if (hasToken) {
-        ws.on('open', () => {
-          setIsConnected(true);
-          // call an RPC method with parameters
-          // ws.call('aria2.getGlobalStat', [token]).then((result) => {
-          //   console.log(result);
-          //   setGlobalStat(result);
-          // });
+    if (rpc && token) {
+      setWs(new Client(`wss://${wsCtx.rpc.host}:${wsCtx.rpc.port}/${wsCtx.rpc.path}`));
+    } else {
+      setWs(null);
+      setIsConnected(false);
+    }
 
-          // send a notification to an RPC server
-          // ws.notify('openedNewsModule');
+  }, [rpc, token]);
 
-          // subscribe to receive an event
-          // ws.subscribe('feedUpdated');
+  useEffect(() => {
+    (() => {
+      if (ws) {
+        try {
+          ws.on('open', () => {
+            console.log('connecting');
+            setIsConnected(true);
+          });
+        } catch (error) {
+          console.error(error);
+          setIsConnected(false);
+        }
 
-          // ws.on('feedUpdated', function () {
-          // });
-
-          // unsubscribe from an event
-          // ws.unsubscribe('feedUpdated');
-
-          // login your client to be able to use protected methods
-          // ws.login({ 'username': 'confi1', 'password': 'foobar' }).then(() => {
-          //   ws.call('account').then(function (result) {
-          //   });
-          // }).catch(function (error) {
-          //   console.log('auth failed');
-          // });
-
-          // close a websocket connection
-          // ws.close();
-        });
       }
     })();
     return () => {
-      if (hasRpcServer) ws.close();
+      if (ws) ws.close();
     };
-  }, [ws, hasToken, hasRpcServer]);
+  }, [ws]);
 
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <AppContext.Provider value={appCtxValue}>
-          <WSContext.Provider value={{ ...wsCtx, isConnected }}>
+          <WSContext.Provider value={{
+            ...wsCtx,
+            ws,
+            isConnected, setIsConnected,
+            rpc, setRpc,
+            token, setToken
+          }}>
             <BrowserRouter>
               <Main colorMode={colorMode} />
             </BrowserRouter>
           </WSContext.Provider>
         </AppContext.Provider>
-
       </ThemeProvider>
     </ColorModeContext.Provider>
   );

@@ -10,10 +10,9 @@ import { TaskTable } from '../components/TaskTable';
 import { formatBytes, getDurationBySeconds, getProgressBySize } from '../utils';
 
 export const Downloading = () => {
-  const { ws, isConnected, token } = useContext(WSContext);
+  const { ws, token, isConnected } = useContext(WSContext);
   const navigate = useNavigate();
   const { taskId } = useParams();
-
 
   const [data, setData] = useState({ data: [], ready: false });
   const { drawerOpen, setDrawerOpen } = useContext(AppContext);
@@ -21,7 +20,7 @@ export const Downloading = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (isConnected) {
+      if (ws && isConnected) {
         ws.call('aria2.tellActive', [token]).then((result) => {
           if (Array.isArray(result)) {
             const now = dayjs().valueOf();
@@ -35,7 +34,7 @@ export const Downloading = () => {
                     progress: getProgressBySize(task.completedLength, task.totalLength),
                   };
                 }).map(task => {
-                  const previous = prev.data.find(xx => xx.gid === task.gid);
+                  const previous = prev.data.find(x => x.gid === task.gid);
                   if (previous) {
                     return {
                       ...task,
@@ -55,10 +54,9 @@ export const Downloading = () => {
           }
         });
       }
-
     }, 1000);
     return () => clearInterval(interval);
-  });
+  }, [ws, token, isConnected]);
 
   const columns = [
     // { field: 'gid', headerName: 'gid' },

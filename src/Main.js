@@ -3,6 +3,7 @@ import Brightness7Icon from '@mui/icons-material/Brightness7';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import MenuIcon from '@mui/icons-material/Menu';
+import { Stack } from '@mui/material';
 import MuiAppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
@@ -12,12 +13,13 @@ import List from '@mui/material/List';
 import { styled, useTheme } from '@mui/material/styles';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import React, { useContext, useState } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import React, { useContext, useEffect, useState } from 'react';
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { WSContext } from './App';
-import { LandingForm } from './components/LandingForm';
+import { LoginForm } from './components/LoginForm';
 import { SideBarItems } from './components/SideBarItems';
 import { Downloading } from './pages/Downloading';
+import LogoutIcon from '@mui/icons-material/Logout';
 import { Home } from './pages/Home';
 
 const drawerWidth = 240;
@@ -69,7 +71,9 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 export const Main = ({ colorMode }) => {
   const theme = useTheme();
-  const { hasToken } = useContext(WSContext);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { rpc, setRpc, isConnected, setIsConnected } = useContext(WSContext);
 
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -81,25 +85,44 @@ export const Main = ({ colorMode }) => {
     setMenuOpen(false);
   };
 
+  useEffect(() => {
+    if (location.pathname === '/') navigate('/active');
+  }, [location, navigate]);
+
+  const onLogoutClick = () => {
+    localStorage.setItem('serverInfo', JSON.stringify({ rpc }));
+    setRpc(null);
+    // setIsConnected(false);
+  };
+
   return (
     <Box sx={{ display: 'flex' }}>
       <AppBar position="fixed" open={menuOpen}>
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            sx={{ mr: 2, ...(menuOpen && { display: 'none' }) }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            aria2x
-          </Typography>
-          <IconButton sx={{ ml: 1 }} color="inherit" onClick={colorMode.toggleColorMode}>
-            {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-          </IconButton>
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
+          <Stack direction={'row'} sx={{ alignItems: 'center' }}>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              onClick={handleDrawerOpen}
+              edge="start"
+              sx={{ mr: 1, ...(menuOpen && { display: 'none' }) }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography variant="h6" noWrap component="div">
+              aria2x
+            </Typography>
+          </Stack>
+          <Stack direction={'row'} sx={{ alignItems: 'center' }}>
+            <IconButton sx={{ ml: 1 }} color="inherit" onClick={colorMode.toggleColorMode}>
+              {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+            </IconButton>
+            {isConnected &&
+              <IconButton sx={{ ml: 1 }} color="inherit" onClick={onLogoutClick}>
+                <LogoutIcon />
+              </IconButton>
+            }
+          </Stack>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -128,8 +151,8 @@ export const Main = ({ colorMode }) => {
       </Drawer>
       <MainWrapper open={menuOpen}>
         <DrawerHeader />
-        {!hasToken
-          ? <LandingForm />
+        {!isConnected
+          ? <LoginForm />
           : <Routes>
             <Route path='/' element={<Home />} />
             <Route path='/active' element={<Downloading />} />
