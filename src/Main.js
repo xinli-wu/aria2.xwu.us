@@ -73,7 +73,7 @@ export const Main = ({ colorMode }) => {
   const theme = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
-  const { rpc, setRpc, isConnected, setIsConnected } = useContext(WSContext);
+  const { rpc, setRpc, isConnected } = useContext(WSContext);
 
   const [menuOpen, setMenuOpen] = useState(false);
 
