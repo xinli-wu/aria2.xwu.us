@@ -51,7 +51,7 @@ function App() {
 
   useEffect(() => {
     if (rpc && token) {
-      setWs(new Client(`wss://${wsCtx.rpc.host}:${wsCtx.rpc.port}/${wsCtx.rpc.path}`));
+      setWs(new Client(`wss://${rpc.host}:${rpc.port}/${rpc.path}`));
     } else {
       setWs(null);
       setIsConnected(false);
