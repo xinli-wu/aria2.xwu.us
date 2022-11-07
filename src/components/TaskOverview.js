@@ -6,7 +6,7 @@ import { DownloadChart } from './DownloadChart';
 
 export const TaskOverview = ({ data, speedHistory }) => {
   const columns = [
-    { field: 'key', width: 150 },
+    { width: 200, field: 'key' },
     {
       field: 'value', width: 600,
       renderCell: (params) => {
