@@ -1,5 +1,4 @@
 import { Drawer } from '@mui/material';
-import dayjs from 'dayjs';
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppContext, WSContext } from '../App';
@@ -8,6 +7,7 @@ import { SpeedCell } from '../components/SpeedCell';
 import { TaskDrawer } from '../components/TaskDrawer';
 import { TaskTable } from '../components/TaskTable';
 import { formatBytes, getDurationBySeconds, getProgressBySize } from '../utils';
+import { DateTime } from 'luxon';
 
 export const Downloading = () => {
   const { ws, token, isConnected } = useContext(WSContext);
@@ -23,7 +23,8 @@ export const Downloading = () => {
       if (ws && isConnected) {
         ws.call('aria2.tellActive', [token]).then((result) => {
           if (Array.isArray(result)) {
-            const now = dayjs().valueOf();
+            const now = DateTime.now().valueOf();
+
             setData(prev => {
               return {
                 data: result.map(task => {

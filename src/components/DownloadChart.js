@@ -3,17 +3,17 @@ import DownloadIcon from '@mui/icons-material/Download';
 import UploadIcon from '@mui/icons-material/Upload';
 import { Paper, Stack, Typography } from '@mui/material';
 import { ResponsiveLine } from '@nivo/line';
-import dayjs from 'dayjs';
+import { DateTime } from 'luxon';
 import React from 'react';
 import { formatBytes } from '../utils';
-export const DownloadChart = ({ speedHistory }) => {
 
+export const DownloadChart = ({ speedHistory }) => {
   const theme = useTheme();
 
   const formatSpeedHistory = (speedHistory) => {
     return speedHistory.slice(-30).map((speed) => {
       return {
-        x: dayjs(speed.x).format(),
+        x: DateTime.fromMillis(speed.x).toISO(),
         y: speed.y
       };
     });
