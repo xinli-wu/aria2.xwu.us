@@ -1,6 +1,6 @@
 import CssBaseline from '@mui/material/CssBaseline';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { Client } from 'rpc-websockets';
 import { Main } from './Main';
@@ -21,10 +21,11 @@ export const WSContext = React.createContext(wsCtx);
 
 const appCtx = {
   drawerOpen: false,
-  setDrawerOpen: (_v) => { }
+  setDrawerOpen: (_v) => { },
+  showLinearProgress: false,
+  setShowLinearProgress: (_v) => { }
 };
 export const AppContext = React.createContext(appCtx);
-
 
 function App() {
   const [rpc, setRpc] = useState(wsCtx.rpc);
@@ -33,7 +34,7 @@ function App() {
   const [isConnected, setIsConnected] = useState(wsCtx.isConnected);
 
   const [drawerOpen, setDrawerOpen] = useState(appCtx.drawerOpen);
-  const appCtxValue = useMemo(() => ({ drawerOpen, setDrawerOpen }), [drawerOpen]);
+  const [showLinearProgress, setShowLinearProgress] = useState(appCtx.showLinearProgress);
 
   const [mode, setMode] = React.useState('dark');
 
@@ -78,13 +79,13 @@ function App() {
     return () => {
       if (ws) ws.close();
     };
-  }, [ws, rpc.host]);
+  }, [ws, rpc?.host]);
 
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <AppContext.Provider value={appCtxValue}>
+        <AppContext.Provider value={{ drawerOpen, setDrawerOpen, showLinearProgress, setShowLinearProgress }}>
           <WSContext.Provider value={{
             ...wsCtx,
             ws,
