@@ -64,20 +64,20 @@ function App() {
       if (ws) {
         try {
           ws.on('open', () => {
-            console.log('connecting');
+            console.log(`connecting to ${rpc.host}`);
             setIsConnected(true);
           });
         } catch (error) {
           console.error(error);
           setIsConnected(false);
         }
-
       }
     })();
+
     return () => {
       if (ws) ws.close();
     };
-  }, [ws]);
+  }, [ws, rpc.host]);
 
   return (
     <ColorModeContext.Provider value={colorMode}>

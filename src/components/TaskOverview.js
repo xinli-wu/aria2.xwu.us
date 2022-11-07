@@ -22,7 +22,7 @@ export const TaskOverview = ({ data, speedHistory }) => {
 
   return (
     <Box sx={{ width: '100%' }}>
-      <div style={{ display: 'flex', height: 400 }}>
+      <div style={{ display: 'flex', height: 500 }}>
         <div style={{ flexGrow: 1 }}>
           <DataGrid
             rows={data}

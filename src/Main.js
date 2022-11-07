@@ -92,7 +92,6 @@ export const Main = ({ colorMode }) => {
   const onLogoutClick = () => {
     localStorage.setItem('serverInfo', JSON.stringify({ rpc }));
     setRpc(null);
-    // setIsConnected(false);
   };
 
   return (
@@ -155,13 +154,13 @@ export const Main = ({ colorMode }) => {
           ? <LoginForm />
           : <Routes>
             <Route path='/' element={<Home />} />
-            <Route path='/active' element={<Downloading />} />
-            <Route path='/active/:taskId' element={<Downloading />} />
-            <Route path='/waiting' element={<Downloading />} />
-            <Route path='/stopped' element={<Downloading />} />
+            <Route path='/active' element={<Downloading status={'active'} />} />
+            <Route path='/active/:taskId' element={<Downloading status={'active'} />} />
+            <Route path='/waiting' element={<Downloading status={'waiting'} />} />
+            <Route path='/waiting/:taskId' element={<Downloading status={'waiting'} />} />
+            <Route path='/stopped' element={<Downloading status={'stopped'} />} />
           </Routes>
         }
-
       </MainWrapper>
     </Box >
   );

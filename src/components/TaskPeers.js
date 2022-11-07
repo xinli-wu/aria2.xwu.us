@@ -20,14 +20,14 @@ export const TaskPeers = () => {
           { "methodName": "aria2.tellStatus", "params": [token, taskId] },
           { "methodName": "aria2.getPeers", "params": [token, taskId] }]
         ]).then((result) => {
-          setPeers([...result[1][0], result[0][0]].map(x => ({ ...x, id: x.ip || 'local' })));
+          setPeers([result[0][0], ...result[1][0]].map(x => ({ ...x, id: x.ip || 'local' })));
         });
       }
 
     }, 1000);
 
     return () => clearInterval(interval);
-  });
+  }, [ws, isConnected, token, taskId]);
 
   const columns = [
     { width: 200, field: 'ip', headerName: 'IP', valueGetter: (params) => `${params.row.ip || params.row.id}:${params.row.port || ''}` },
@@ -40,11 +40,20 @@ export const TaskPeers = () => {
       }
     },
     {
-      width: 250, field: 'downloadSpeed', headerName: 'Download Speed',
+      width: 125, field: 'downloadSpeed', headerName: '⬇️ Speed',
       renderCell: (params) => {
-        const { downloadSpeed, uploadSpeed } = params.row;
+        const { downloadSpeed } = params.row;
         return (
-          <SpeedCell downloadSpeed={downloadSpeed} uploadSpeed={uploadSpeed} />
+          <SpeedCell downloadSpeed={downloadSpeed} />
+        );
+      }
+    },
+    {
+      width: 125, field: 'uploadSpeed', headerName: '⬆️ Speed',
+      renderCell: (params) => {
+        const { uploadSpeed } = params.row;
+        return (
+          <SpeedCell uploadSpeed={uploadSpeed} />
         );
       }
     },

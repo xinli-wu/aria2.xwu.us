@@ -13,7 +13,7 @@ export const Status = () => {
       });
     }
 
-  });
+  }, [ws, isConnected, token]);
 
   return (
     <div>

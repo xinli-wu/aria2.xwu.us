@@ -1,5 +1,5 @@
 import { Drawer } from '@mui/material';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppContext, WSContext } from '../App';
 import { ProgressChart } from '../components/ProgressChart';
@@ -9,7 +9,7 @@ import { TaskTable } from '../components/TaskTable';
 import { formatBytes, getDurationBySeconds, getProgressBySize } from '../utils';
 import { DateTime } from 'luxon';
 
-export const Downloading = () => {
+export const Downloading = ({ status }) => {
   const { ws, token, isConnected } = useContext(WSContext);
   const navigate = useNavigate();
   const { taskId } = useParams();
@@ -18,10 +18,33 @@ export const Downloading = () => {
   const { drawerOpen, setDrawerOpen } = useContext(AppContext);
   const [clickedRow, setClickedRow] = useState(null);
 
+  const callFn = useMemo(() => {
+    switch (status) {
+      case 'active':
+        return {
+          name: 'aria2.tellActive',
+          params: [token]
+        };
+      case 'waiting':
+        return {
+          name: 'aria2.tellWaiting',
+          params: [token, 0, 1000, ["gid", "totalLength", "completedLength", "uploadSpeed", "downloadSpeed", "connections", "numSeeders", "seeder", "status", "errorCode", "verifiedLength", "verifyIntegrityPending", "files", "bittorrent", "infoHash"]]
+        };
+      case 'stopped':
+        return {
+          name: 'aria2.tellStopped',
+          params: [token, -1, 1000, ["gid", "totalLength", "completedLength", "uploadSpeed", "downloadSpeed", "connections", "numSeeders", "seeder", "status", "errorCode", "verifiedLength", "verifyIntegrityPending"]]
+        };
+      default:
+        return {};
+    }
+
+  }, [status, token]);
+
   useEffect(() => {
     const interval = setInterval(() => {
       if (ws && isConnected) {
-        ws.call('aria2.tellActive', [token]).then((result) => {
+        ws.call(callFn.name, callFn.params).then((result) => {
           if (Array.isArray(result)) {
             const now = DateTime.now().valueOf();
 
@@ -57,10 +80,9 @@ export const Downloading = () => {
       }
     }, 1000);
     return () => clearInterval(interval);
-  }, [ws, token, isConnected]);
+  }, [ws, isConnected, token, callFn]);
 
   const columns = [
-    // { field: 'gid', headerName: 'gid' },
     { width: 500, field: 'bittorrent', headerName: 'Name', valueGetter: (params) => params.row.bittorrent?.info?.name },
     { field: 'status', headerName: 'Status' },
     {
@@ -83,26 +105,26 @@ export const Downloading = () => {
   const onCellClick = (params) => {
     if (params.field !== '__check__') {
       navigate(`${params.row.gid}`);
-      setDrawerOpen(true);
     };
     setClickedRow(params.row);
   };
 
   useEffect(() => {
-    if (taskId && !drawerOpen && data.data.length) {
-      const selectedTask = data.data.find(x => x.gid === taskId);
-      if (selectedTask) {
-        setDrawerOpen(true);
-        setClickedRow(selectedTask);
+    if (data.data.length) {
+      if (taskId) {
+        const selectedTask = data.data.find(x => x.gid === taskId);
+        if (selectedTask) {
+          setDrawerOpen(true);
+          setClickedRow(selectedTask);
+        }
       } else {
-        navigate(`/active`);
+        setDrawerOpen(false);
       }
     }
   }, [data, taskId, drawerOpen, setDrawerOpen, navigate]);
 
   const onDrawerClose = () => {
-    setDrawerOpen(false);
-    navigate(`/active`);
+    navigate(-1);
   };
 
   return (

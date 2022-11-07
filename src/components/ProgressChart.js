@@ -3,14 +3,13 @@ import { ResponsiveBar } from '@nivo/bar';
 import { useTheme } from '@emotion/react';
 
 export const ProgressChart = ({ progress }) => {
-
   const theme = useTheme();
   const bgColor = theme.palette.mode === 'dark' ? theme.palette.grey['800'] : theme.palette.grey['300'];
+  const pColor = theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.primary.main;
 
   const data = [{
     "progress": progress,
-    "completedLength": progress * 100,
-    "totalLength": 100
+    "completedLength": progress * 100
   }];
 
   return (
@@ -24,12 +23,10 @@ export const ProgressChart = ({ progress }) => {
         layout="horizontal"
         valueScale={{ type: 'linear' }}
         indexScale={{ type: 'band', round: true }}
-        colors={[theme.palette.primary.main, theme.palette.grey['A700']]}
+        colors={[pColor]}
         maxValue={100}
         isInteractive={false}
-        theme={{
-          background: bgColor
-        }}
+        theme={{ background: bgColor }}
         padding={0}
         axisTop={null}
         axisRight={null}

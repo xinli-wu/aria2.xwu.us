@@ -8,16 +8,19 @@ export const TaskPieces = ({ bitfield }) => {
   const bin = hex2bin(bitfield).toString();
 
   return (
-    <Box style={{ display: 'flex', flexWrap: 'wrap' }}>
+    <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
       {bin.split('').map((x, i) => {
         return (
-          <div key={i} style={{
-            height: 10,
-            width: 10,
-            backgroundColor: x === '1' ? theme.palette.primary.dark : theme.palette.background.default,
-            margin: 1,
-            border: `1px solid ${theme.palette.primary.dark}`
-          }} />);
+          <Box key={i}
+            sx={{
+              height: 10,
+              width: 10,
+              backgroundColor: x === '1' ? theme.palette.success.light : theme.palette.background.default,
+              m: '1px',
+              border: `1px solid ${theme.palette.success.light}`
+            }}
+          />
+        );
       })}
     </Box>
   );

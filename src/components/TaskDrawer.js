@@ -48,7 +48,7 @@ export const TaskDrawer = ({ params }) => {
     setTabId(newValue);
   };
   return (
-    <Box sx={{ width: '100%', height: '100%', bgcolor: 'background.paper' }}>
+    <>
       <TabContext value={tabId}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <TabList onChange={onTabsChange} aria-label="lab API tabs example" centered>
@@ -71,6 +71,6 @@ export const TaskDrawer = ({ params }) => {
           <TaskPeers />
         </TabPanel>
       </TabContext>
-    </Box >
+    </>
   );
 };

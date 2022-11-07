@@ -11,9 +11,9 @@ export const DownloadChart = ({ speedHistory }) => {
   const theme = useTheme();
 
   const formatSpeedHistory = (speedHistory) => {
-    return speedHistory.slice(-30).map((speed) => {
+    return speedHistory.map((speed) => {
       return {
-        x: DateTime.fromMillis(speed.x).toISO(),
+        x: DateTime.fromMillis(speed.x).toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS),
         y: speed.y
       };
     });
@@ -53,11 +53,13 @@ export const DownloadChart = ({ speedHistory }) => {
         // useMesh={true}
         enableSlices={'x'}
         sliceTooltip={({ slice }) => {
+          const timestamp = slice.points.find(x => x.serieId === 'download')?.data?.xFormatted;
           const download = slice.points.find(x => x.serieId === 'download')?.data?.yFormatted;
           const upload = slice.points.find(x => x.serieId === 'upload')?.data?.yFormatted;
           return (
             <Paper sx={{ bgcolor: theme.palette.background.default, p: 1 }}>
               <Stack direction={'column'} spacing={1} >
+                <Typography>{timestamp}</Typography>
                 <Stack direction={'row'} spacing={2} sx={{ alignItems: 'center' }} >
                   <DownloadIcon color='success' />
                   <Typography>{formatBytes(download)}/s</Typography>

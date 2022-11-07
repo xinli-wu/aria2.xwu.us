@@ -17,7 +17,7 @@ export const Home = () => {
 
     }, 1000);
     return () => clearInterval(interval);
-  });
+  }, [ws, isConnected, token]);
 
   return (
     <div>
