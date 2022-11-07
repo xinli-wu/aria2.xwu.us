@@ -43,7 +43,6 @@ export const DownloadChart = ({ speedHistory }) => {
           reverse: false
         }}
         // yFormat={(v) => {
-        //   console.log(formatBytes(v));
         //   return formatBytes(v);
         // }}
         curve="monotoneX"
