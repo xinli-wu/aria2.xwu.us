@@ -1,4 +1,5 @@
-import { Button, LinearProgress, Paper, Stack, TextField } from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
+import { LinearProgress, Paper, Stack, TextField } from '@mui/material';
 import Box from '@mui/material/Box';
 import InputAdornment from '@mui/material/InputAdornment';
 import React, { useContext, useState } from 'react';
@@ -41,55 +42,53 @@ export const LoginForm = () => {
           <Stack spacing={4} sx={{ m: 4 }}>
             <Stack direction={'row'}>
               <TextField
-                label="Aria2 Server"
+                label='Aria2 Server'
                 sx={{ width: '50ch' }}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start">wws://</InputAdornment>,
-                }}
-                variant="standard"
+                InputProps={{ startAdornment: <InputAdornment position='start'>wws://</InputAdornment>, }}
+                variant='standard'
                 value={server.host}
                 onChange={onRpcHostChange}
               />
               <TextField
-                label="Port"
+                label='Port'
                 sx={{ width: '15ch' }}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start">:</InputAdornment>,
-                }}
-                variant="standard"
+                InputProps={{ startAdornment: <InputAdornment position='start'>:</InputAdornment>, }}
+                variant='standard'
                 type={'number'}
                 value={server.port}
                 onChange={onRpcPortChange}
               />
               <TextField
-                label="Path"
+                label='Path'
                 sx={{ width: '15ch', maxWidth: '15ch' }}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start">/</InputAdornment>,
-                }}
-                variant="standard"
+                InputProps={{ startAdornment: <InputAdornment position='start'>/</InputAdornment>, }}
+                variant='standard'
                 value={server.path}
                 onChange={onRpcPathChange}
               />
             </Stack>
             <TextField
-              label="Token"
-              InputLabelProps={{
-                shrink: true,
-              }}
+              label='Token'
+              InputLabelProps={{ shrink: true, }}
               type={'password'}
-              variant="standard"
+              variant='standard'
               onChange={onRpcTokenChange}
             />
             <Stack direction={'row'} spacing={2} sx={{ justifyContent: 'end' }}>
-              <Button onClick={onConnectClick}>Clear</Button>
-              <Button variant="contained" onClick={onConnectClick}>Connect</Button>
+              {/* <Button onClick={onConnectClick} disabled={rpc && token && !isConnected}>Clear</Button> */}
+              <LoadingButton
+                size="small"
+                onClick={onConnectClick}
+                loading={rpc && token && !isConnected}
+                variant="contained"
+                disabled={rpc && token && !isConnected}
+              >
+                Connect
+              </LoadingButton>
             </Stack>
           </Stack>
         </Paper>
-
       </Box >
-
     </>
   );
 };
