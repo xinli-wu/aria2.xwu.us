@@ -1,10 +1,13 @@
 import { Box } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
-import React from 'react';
+import React, { useContext } from 'react';
+import { TaskContext } from '../Main';
 import { CellPopper } from './CellPopper';
 import { DownloadChart } from './DownloadChart';
 
 export const TaskOverview = ({ data, speedHistory }) => {
+  const { status } = useContext(TaskContext);
+
   const columns = [
     { width: 200, field: 'key' },
     {
@@ -31,7 +34,7 @@ export const TaskOverview = ({ data, speedHistory }) => {
             hideFooter
             density="compact"
           />
-          <DownloadChart speedHistory={speedHistory} />
+          {status === 'active' && <DownloadChart speedHistory={speedHistory} />}
         </div>
       </div>
     </Box>

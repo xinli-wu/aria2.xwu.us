@@ -25,6 +25,7 @@ const appCtx = {
 };
 export const AppContext = React.createContext(appCtx);
 
+
 function App() {
   const [rpc, setRpc] = useState(wsCtx.rpc);
   const [ws, setWs] = useState(wsCtx.ws);

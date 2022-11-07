@@ -65,7 +65,7 @@ export const TaskDrawer = ({ params }) => {
           <TaskFiles data={files} />
         </TabPanel>
         <TabPanel value="2">
-          <TaskPieces bitfield={params.bitfield} />
+          {params.bitfield && <TaskPieces bitfield={params.bitfield} />}
         </TabPanel>
         <TabPanel value="3">
           <TaskPeers />

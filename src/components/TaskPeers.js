@@ -20,7 +20,9 @@ export const TaskPeers = () => {
           { "methodName": "aria2.tellStatus", "params": [token, taskId] },
           { "methodName": "aria2.getPeers", "params": [token, taskId] }]
         ]).then((result) => {
-          setPeers([result[0][0], ...result[1][0]].map(x => ({ ...x, id: x.ip || 'local' })));
+          const combined = [result[0][0]];
+          if (Array.isArray(result[1][0])) combined.push(result[1][0]);
+          setPeers(combined.map(x => ({ ...x, id: x.ip || 'local' })));
         });
       }
 
@@ -35,7 +37,7 @@ export const TaskPeers = () => {
       width: 150, field: 'bitfield', headerName: 'Bit Fields',
       renderCell: (params) => {
         return (
-          <BitfieldCanvas bitfield={params.row.bitfield} />
+          params.row.bitfield ? <BitfieldCanvas bitfield={params.row.bitfield} /> : null
         );
       }
     },

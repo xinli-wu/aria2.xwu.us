@@ -8,14 +8,17 @@ import { TaskDrawer } from '../components/TaskDrawer';
 import { TaskTable } from '../components/TaskTable';
 import { formatBytes, getDurationBySeconds, getProgressBySize } from '../utils';
 import { DateTime } from 'luxon';
+import { TaskContext } from '../Main';
 
-export const Downloading = ({ status }) => {
+export const Downloading = () => {
   const { ws, token, isConnected } = useContext(WSContext);
+  const { drawerOpen, setDrawerOpen } = useContext(AppContext);
+  const { status } = useContext(TaskContext);
+
   const navigate = useNavigate();
   const { taskId } = useParams();
 
   const [data, setData] = useState({ data: [], ready: false });
-  const { drawerOpen, setDrawerOpen } = useContext(AppContext);
   const [clickedRow, setClickedRow] = useState(null);
 
   const callFn = useMemo(() => {
@@ -28,12 +31,43 @@ export const Downloading = ({ status }) => {
       case 'waiting':
         return {
           name: 'aria2.tellWaiting',
-          params: [token, 0, 1000, ["gid", "totalLength", "completedLength", "uploadSpeed", "downloadSpeed", "connections", "numSeeders", "seeder", "status", "errorCode", "verifiedLength", "verifyIntegrityPending", "files", "bittorrent", "infoHash"]]
+          params: [token, 0, 1000, ['gid'
+            , 'totalLength'
+            , 'completedLength'
+            , 'uploadSpeed'
+            , 'downloadSpeed'
+            , 'connections'
+            , 'numSeeders'
+            , 'seeder'
+            , 'status'
+            , 'errorCode'
+            , 'verifiedLength'
+            , 'verifyIntegrityPending'
+            , 'files'
+            , 'bittorrent'
+            , 'infoHash'
+            , 'bitfield'
+          ]]
         };
       case 'stopped':
         return {
           name: 'aria2.tellStopped',
-          params: [token, -1, 1000, ["gid", "totalLength", "completedLength", "uploadSpeed", "downloadSpeed", "connections", "numSeeders", "seeder", "status", "errorCode", "verifiedLength", "verifyIntegrityPending"]]
+          params: [token, -1, 1000, ['gid'
+            , 'totalLength'
+            , 'completedLength'
+            , 'uploadSpeed'
+            , 'downloadSpeed'
+            , 'connections'
+            , 'numSeeders'
+            , 'seeder'
+            , 'status'
+            , 'errorCode'
+            , 'verifiedLength'
+            , 'verifyIntegrityPending'
+            , 'bittorrent'
+            , 'files'
+            , 'bitfield'
+          ]]
         };
       default:
         return {};
