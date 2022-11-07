@@ -81,7 +81,6 @@ export const Downloading = () => {
         ws.call(callFn.name, callFn.params).then((result) => {
           if (Array.isArray(result)) {
             const now = DateTime.now().valueOf();
-
             setData(prev => {
               return {
                 data: result.map(task => {

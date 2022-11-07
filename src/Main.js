@@ -2,6 +2,7 @@ import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
+import { LinearProgress } from '@mui/material';
 import { Stack } from '@mui/material';
 import MuiAppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -11,7 +12,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import React, { useContext, useEffect, useState } from 'react';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { WSContext } from './App';
+import { AppContext, WSContext } from './App';
 import { DrawerHeader } from './components/DrawerHeader';
 import { LoginForm } from './components/LoginForm';
 import { MenuDrawer } from './components/MenuDrawer';
@@ -69,6 +70,7 @@ export const Main = ({ colorMode }) => {
 
   const navigate = useNavigate();
   const { rpc, setRpc, isConnected } = useContext(WSContext);
+  const { showLinearProgress } = useContext(AppContext);
 
   const initStatus =
     location.pathname.startsWith('/active')
@@ -102,6 +104,7 @@ export const Main = ({ colorMode }) => {
     <TaskContext.Provider value={{ status, setStatus }}>
       <Box sx={{ display: 'flex' }}>
         <AppBar position="fixed" open={menuOpen}>
+          <LinearProgress style={{ visibility: showLinearProgress ? 'visible' : 'hidden' }} />
           <Toolbar sx={{ justifyContent: 'space-between' }}>
             <Stack direction={'row'} sx={{ alignItems: 'center' }}>
               <IconButton

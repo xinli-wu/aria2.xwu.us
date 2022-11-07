@@ -61,6 +61,5 @@ export const MenuDrawer = ({ menuOpen, handleDrawerClose }) => {
       </List>
       <Divider />
     </Drawer>
-
   );
 };
