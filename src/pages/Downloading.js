@@ -111,7 +111,7 @@ export const Downloading = () => {
           }
         });
       }
-    }, 1000);
+    }, 3000);
     return () => clearInterval(interval);
   }, [ws, isConnected, token, callFn]);
 

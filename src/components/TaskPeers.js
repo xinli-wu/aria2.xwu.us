@@ -1,17 +1,19 @@
 import CheckIcon from '@mui/icons-material/Check';
 import DoNotDisturbIcon from '@mui/icons-material/DoNotDisturb';
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { WSContext } from '../App';
 import { BitfieldCanvas } from './BitfieldCanvas';
 import { SpeedCell } from './SpeedCell';
+import axios from 'axios';
 
 export const TaskPeers = () => {
   const { ws, isConnected, token } = useContext(WSContext);
   const { taskId } = useParams();
   const [peers, setPeers] = useState([]);
+  const ipGeoInfo = useMemo(() => ({}), []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -20,9 +22,8 @@ export const TaskPeers = () => {
           { "methodName": "aria2.tellStatus", "params": [token, taskId] },
           { "methodName": "aria2.getPeers", "params": [token, taskId] }]
         ]).then((result) => {
-          const combined = [result[0][0]];
-          if (Array.isArray(result[1][0])) combined.push(result[1][0]);
-          setPeers(combined.map(x => ({ ...x, id: x.ip || 'local' })));
+          // console.log(result[1][0]);
+          setPeers([result[0][0], ...result[1][0]].map((x, i) => ({ ...x, id: i })));
         });
       }
 
@@ -31,31 +32,68 @@ export const TaskPeers = () => {
     return () => clearInterval(interval);
   }, [ws, isConnected, token, taskId]);
 
+  useEffect(() => {
+    const controller = new AbortController();
+    (async () => {
+      const filteredRemotePeers = peers.filter(x => x.ip && !ipGeoInfo[x.ip]);
+      const geoInfo = await Promise.all(filteredRemotePeers.map(x => axios(`https://api.ip.xwu.us/${x.ip}`)));
+      geoInfo.filter(x => x.status === 200)
+        .forEach(({ data }) => ipGeoInfo[data.ip] = data);
+    })();
+    return () => controller.abort();
+  }, [peers, ipGeoInfo]);
+
   const columns = [
-    { width: 200, field: 'ip', headerName: 'IP', valueGetter: (params) => `${params.row.ip || params.row.id}:${params.row.port || ''}` },
+    { width: 200, field: 'ip', headerName: 'IP', valueGetter: (params) => `${params.row.ip || '(local)'}:${params.row.port || ''}` },
+    {
+      width: 200, field: 'location', headerName: 'Location',
+      renderCell: (params) => {
+        const { city, region, country, continent } = ipGeoInfo[params.row.ip] || {};
+        return <Typography>{city},{region},{country},{continent}</Typography>;
+      }
+    },
+    {
+      width: 200, field: 'isp', headerName: 'ISP',
+      renderCell: (params) => {
+        const { isp } = ipGeoInfo[params.row.ip] || {};
+        return <Typography>{isp}</Typography>;
+      }
+    },
     {
       width: 150, field: 'bitfield', headerName: 'Bit Fields',
       renderCell: (params) => {
         return (
-          params.row.bitfield ? <BitfieldCanvas bitfield={params.row.bitfield} /> : null
+          params.row.bitfield && <BitfieldCanvas bitfield={params.row.bitfield} />
+        );
+      }
+    },
+    // {
+    //   width: 150, field: 'progress', headerName: 'Progress',
+    //   renderCell: (params) => {
+    //     const bin = hex2bin(params.row.bitfield);
+    //     console.log(bin);
+    //     const count = (bin.match(/1/g) || []).length;
+    //     return <ProgressChart progress={count / bin.length} />;
+    //   }
+    // },
+    {
+      width: 250, field: 'speed', headerName: 'Speed',
+      renderCell: (params) => {
+        const { id, downloadSpeed, uploadSpeed } = params.row;
+        return (
+          <SpeedCell
+            downloadSpeed={id ? uploadSpeed : downloadSpeed}
+            uploadSpeed={id ? downloadSpeed : uploadSpeed}
+          />
         );
       }
     },
     {
-      width: 125, field: 'downloadSpeed', headerName: '⬇️ Speed',
+      width: 125, field: 'connections', headerName: 'Connections',
       renderCell: (params) => {
-        const { downloadSpeed } = params.row;
+        const { connections, numSeeders } = params.row;
         return (
-          <SpeedCell downloadSpeed={downloadSpeed} />
-        );
-      }
-    },
-    {
-      width: 125, field: 'uploadSpeed', headerName: '⬆️ Speed',
-      renderCell: (params) => {
-        const { uploadSpeed } = params.row;
-        return (
-          <SpeedCell uploadSpeed={uploadSpeed} />
+          <Typography>{numSeeders && connections && `${numSeeders}/${connections}`}</Typography>
         );
       }
     },
