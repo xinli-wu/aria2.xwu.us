@@ -2,12 +2,13 @@ import CheckIcon from '@mui/icons-material/Check';
 import DoNotDisturbIcon from '@mui/icons-material/DoNotDisturb';
 import { Box, Typography } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
+import axios from 'axios';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { WSContext } from '../App';
 import { BitfieldCanvas } from './BitfieldCanvas';
 import { SpeedCell } from './SpeedCell';
-import axios from 'axios';
+import { TableCellMultiLine } from './TableCellMultiLine';
 
 export const TaskPeers = () => {
   const { ws, isConnected, token } = useContext(WSContext);
@@ -19,10 +20,9 @@ export const TaskPeers = () => {
     const interval = setInterval(() => {
       if (isConnected) {
         ws.call('system.multicall', [[
-          { "methodName": "aria2.tellStatus", "params": [token, taskId] },
-          { "methodName": "aria2.getPeers", "params": [token, taskId] }]
+          { 'methodName': 'aria2.tellStatus', 'params': [token, taskId] },
+          { 'methodName': 'aria2.getPeers', 'params': [token, taskId] }]
         ]).then((result) => {
-          // console.log(result[1][0]);
           setPeers([result[0][0], ...result[1][0]].map((x, i) => ({ ...x, id: i })));
         });
       }
@@ -36,27 +36,30 @@ export const TaskPeers = () => {
     const controller = new AbortController();
     (async () => {
       const filteredRemotePeers = peers.filter(x => x.ip && !ipGeoInfo[x.ip]);
-      const geoInfo = await Promise.all(filteredRemotePeers.map(x => axios(`https://api.ip.xwu.us/${x.ip}`)));
-      geoInfo.filter(x => x.status === 200)
-        .forEach(({ data }) => ipGeoInfo[data.ip] = data);
+      const geoInfo = await Promise.all(filteredRemotePeers.map(x => axios(`https://api.ip.xwu.us/${x.ip}`, { signal: controller.signal })));
+      geoInfo.filter(x => x.status === 200).forEach(({ data }) => ipGeoInfo[data.ip] = data);
     })();
     return () => controller.abort();
   }, [peers, ipGeoInfo]);
 
   const columns = [
-    { width: 200, field: 'ip', headerName: 'IP', valueGetter: (params) => `${params.row.ip || '(local)'}:${params.row.port || ''}` },
+    { width: 180, field: 'ip', headerName: 'IP', valueGetter: (params) => `${params.row.ip || '(local)'}:${params.row.port || ''}` },
     {
-      width: 200, field: 'location', headerName: 'Location',
+      width: 220, field: 'location', headerName: 'Location', align: 'right',
       renderCell: (params) => {
         const { city, region, country, continent } = ipGeoInfo[params.row.ip] || {};
-        return <Typography>{city},{region},{country},{continent}</Typography>;
+
+        return ipGeoInfo[params.row.ip] &&
+          <TableCellMultiLine data={[`${city}, ${region}`, `${country}, ${continent}`]} />;
+
       }
     },
     {
-      width: 200, field: 'isp', headerName: 'ISP',
+      width: 200, field: 'isp', headerName: 'ISP', align: 'right',
       renderCell: (params) => {
         const { isp } = ipGeoInfo[params.row.ip] || {};
-        return <Typography>{isp}</Typography>;
+        return ipGeoInfo[params.row.ip] && <TableCellMultiLine data={[isp]} />;
+
       }
     },
     {
