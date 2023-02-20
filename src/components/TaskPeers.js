@@ -137,7 +137,7 @@ export const TaskPeers = () => {
           />
         </div>
       </div>
-      <Dialog onClose={() => setIframe({ open: false, ip: null })} open={iframe.open} >
+      <Dialog onClose={() => setIframe({ open: false, ip: null })} open={iframe.open && iframe.ip !== null} >
         {ipGeoInfo[iframe.ip] && <DialogTitle>{ipGeoInfo[iframe.ip].city}, {ipGeoInfo[iframe.ip].region}, {ipGeoInfo[iframe.ip].country}, {ipGeoInfo[iframe.ip].continent} ({iframe.ip})</DialogTitle>}
         {iframe && <iframe src={`${GEO_IP_URL}/${iframe.ip}`} width='600' height='600' title='Geo Location' style={{ border: 'none' }} />}
       </Dialog>
