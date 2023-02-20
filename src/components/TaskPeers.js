@@ -1,6 +1,6 @@
 import CheckIcon from '@mui/icons-material/Check';
 import DoNotDisturbIcon from '@mui/icons-material/DoNotDisturb';
-import { Box, Typography } from '@mui/material';
+import { Box, Dialog, DialogTitle, Typography } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import axios from 'axios';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
@@ -10,10 +10,14 @@ import { BitfieldCanvas } from './BitfieldCanvas';
 import { SpeedCell } from './SpeedCell';
 import { TableCellMultiLine } from './TableCellMultiLine';
 
+const GEO_IP_URL = 'https://ip.xwu.us';
+const GEO_IP_API_URL = 'https://api.ip.xwu.us';
+
 export const TaskPeers = () => {
   const { ws, isConnected, token } = useContext(WSContext);
   const { taskId } = useParams();
   const [peers, setPeers] = useState([]);
+  const [iframe, setIframe] = useState({ open: false, ip: null });
   const ipGeoInfo = useMemo(() => ({}), []);
 
   useEffect(() => {
@@ -36,7 +40,7 @@ export const TaskPeers = () => {
     const controller = new AbortController();
     (async () => {
       const filteredRemotePeers = peers.filter(x => x.ip && !ipGeoInfo[x.ip]);
-      const geoInfo = await Promise.all(filteredRemotePeers.map(x => axios(`https://api.ip.xwu.us/${x.ip}`, { signal: controller.signal })));
+      const geoInfo = await Promise.all(filteredRemotePeers.map(x => axios(`${GEO_IP_API_URL}/${x.ip}`, { signal: controller.signal })));
       geoInfo.filter(x => x.status === 200).forEach(({ data }) => ipGeoInfo[data.ip] = data);
     })();
     return () => controller.abort();
@@ -63,7 +67,7 @@ export const TaskPeers = () => {
       }
     },
     {
-      width: 150, field: 'bitfield', headerName: 'Bit Fields',
+      width: 100, field: 'bitfield', headerName: 'Bit Fields',
       renderCell: (params) => {
         return (
           params.row.bitfield && <BitfieldCanvas bitfield={params.row.bitfield} />
@@ -111,17 +115,32 @@ export const TaskPeers = () => {
     },
   ];
 
+  const onCellClick = (params) => {
+    if (params.row.ip) setIframe({ open: true, ip: params.row.ip });
+  };
+
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={{ width: '100%', }}>
       <div style={{ display: 'flex', height: 870 }}>
-        <div style={{ flexGrow: 1 }}>
+        <div style={{ flexGrow: 1, }}>
           <DataGrid
+            onRowClick={onCellClick}
             rows={peers}
             columns={columns}
             density="compact"
+            getRowClassName={(_params) => `hover-cursor`}
+            sx={{
+              '& .MuiDataGrid-row:hover': {
+                cursor: 'pointer',
+              },
+            }}
           />
         </div>
       </div>
+      <Dialog onClose={() => setIframe({ open: false, ip: null })} open={iframe.open} >
+        {ipGeoInfo[iframe.ip] && <DialogTitle>{ipGeoInfo[iframe.ip].city}, {ipGeoInfo[iframe.ip].region}, {ipGeoInfo[iframe.ip].country}, {ipGeoInfo[iframe.ip].continent} ({iframe.ip})</DialogTitle>}
+        {iframe && <iframe src={`${GEO_IP_URL}/${iframe.ip}`} width='600' height='600' title='Geo Location' style={{ border: 'none' }} />}
+      </Dialog>
     </Box>
   );
 }
