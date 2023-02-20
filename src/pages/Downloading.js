@@ -31,7 +31,8 @@ export const Downloading = () => {
       case 'waiting':
         return {
           name: 'aria2.tellWaiting',
-          params: [token, 0, 1000, ['gid'
+          params: [token, 0, 1000, [
+            'gid'
             , 'totalLength'
             , 'completedLength'
             , 'uploadSpeed'
@@ -52,7 +53,8 @@ export const Downloading = () => {
       case 'stopped':
         return {
           name: 'aria2.tellStopped',
-          params: [token, -1, 1000, ['gid'
+          params: [token, -1, 1000, [
+            'gid'
             , 'totalLength'
             , 'completedLength'
             , 'uploadSpeed'
@@ -162,21 +164,23 @@ export const Downloading = () => {
 
   return (
     <>
-      {data.ready && <>
-        <TaskTable
-          rows={data.data}
-          columns={columns}
-          onCellClick={onCellClick}
-        />
-        <Drawer
-          PaperProps={{ sx: { width: '70%' } }}
-          anchor={'right'}
-          open={drawerOpen}
-          onClose={onDrawerClose}
-        >
-          <TaskDrawer params={data.data.find(x => x.gid === clickedRow?.gid)} />
-        </Drawer>
-      </>}
+      {data.ready && (
+        <>
+          <TaskTable
+            rows={data.data}
+            columns={columns}
+            onCellClick={onCellClick}
+          />
+          <Drawer
+            PaperProps={{ sx: { width: '70%' } }}
+            anchor={'right'}
+            open={drawerOpen}
+            onClose={onDrawerClose}
+          >
+            <TaskDrawer params={data.data.find(x => x.gid === clickedRow?.gid)} />
+          </Drawer>
+        </>
+      )}
     </>
   );
 };
